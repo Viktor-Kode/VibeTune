@@ -42,7 +42,7 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="absolute top-23 left-0 w-[50%] bg-gray-900 pb-7 text-white flex flex-col items-center gap-6 py-6 md:hidden z-50">
+        <div className="absolute top-23 right-0 w-[50%] bg-gray-900 pb-7 text-white flex flex-col items-center gap-6 py-6 md:hidden z-50">
           <ul className="flex flex-col gap-6 text-2xl">
             <li className="hover:text-sky-400 cursor-pointer">Home</li>
             <li className="hover:text-sky-400 cursor-pointer"><a href="#about">About</a></li>

@@ -4,7 +4,7 @@ const Discover = () => {
   return (
     <section
       id="discover"
-      className=" bg-gradient-to-b from-gray-900 to-black text-white py-16 px-6 md:px-20 flex justify-center"
+      className=" bg-gradient-to-b from-gray-200 to-black text-white py-16 px-6 md:px-20 flex justify-center"
     >
       <div className="max-w-6xl mx-auto text-center">
         <h2 className="text-4xl md:text-5xl font-bold mb-8 text-sky-400">Discover New Vibes</h2>
