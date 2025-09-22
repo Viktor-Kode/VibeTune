@@ -20,7 +20,7 @@ const About = () => {
           we help you discover the sounds that match your mood, your moment, and your vibe. Whether you're diving into
           Afrobeat rhythms, lo-fi chill, or underground gems, VibeTune connects you to the pulse of global music culture.
         </p>
-        <p className="mt-6 text-base md:text-xl leading-relaxed text-gray-300">
+        <p className="mt-6 text-base md:text-xl leading-relaxed text-black">
           Our mission is simple: empower artists, elevate listeners, and make music discovery feel like magic.
           From curated playlists to real-time search, VibeTune is your gateway to sonic exploration.
         </p>
