@@ -35,34 +35,34 @@ const Contact = () => {
 
         <form ref={form} onSubmit={sendEmail} className="space-y-6 text-left">
           <div>
-            <label className="block mb-2 text-sm font-medium text-gray-300">Name</label>
+            <label className="block mb-2 text-sm font-medium text-black">Name</label>
             <input
               type="text"
               name="user_name"
               required
-              className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-400"
+              className="w-full px-4 py-3 rounded-lg bg-white text-black border border-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-400"
               placeholder="Your name"
             />
           </div>
 
           <div>
-            <label className="block mb-2 text-sm font-medium text-gray-300">Email</label>
+            <label className="block mb-2 text-sm font-medium text-black">Email</label>
             <input
               type="email"
               name="user_email"
               required
-              className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-400"
+              className="w-full px-4 py-3 rounded-lg bg-white text-black border border-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-400"
               placeholder="you@example.com"
             />
           </div>
 
           <div>
-            <label className="block mb-2 text-sm font-medium text-gray-300">Message</label>
+            <label className="block mb-2 text-sm font-medium text-black">Message</label>
             <textarea
               name="message"
               rows="5"
               required
-              className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-400"
+              className="w-full px-4 py-3 rounded-lg bg-white text-black border border-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-400"
               placeholder="Tell us what’s on your mind..."
             ></textarea>
           </div>

@@ -2,7 +2,7 @@ import React from 'react';
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-200 text-gray-300 py-8 px-6 md:px-20">
+    <footer className="bg-gray-700 text-gray-300 py-8 px-6 md:px-20">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-4">
         {/* Logo or Brand */}
         <h1 className="text-2xl font-bold text-white">VibeTune</h1>
