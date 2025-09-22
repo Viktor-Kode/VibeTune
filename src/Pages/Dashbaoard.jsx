@@ -1,12 +1,19 @@
-// Dashboard.jsx
 import React, { useEffect, useState } from "react";
 import { auth, db } from "../firebase";
 import { Link, useNavigate } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
 import {
-  FaHome, FaMusic, FaListUl, FaCog, FaSignOutAlt,
-  FaPlay, FaPause, FaStepForward, FaStepBackward,
-  FaBars, FaTimes,
+  FaHome,
+  FaMusic,
+  FaListUl,
+  FaCog,
+  FaSignOutAlt,
+  FaPlay,
+  FaPause,
+  FaStepForward,
+  FaStepBackward,
+  FaBars,
+  FaTimes,
 } from "react-icons/fa";
 
 const Dashboard = () => {
@@ -19,11 +26,10 @@ const Dashboard = () => {
     recentActivity: [],
   });
   const [loading, setLoading] = useState(true);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Deezer search states
-
+  const [currentTrack, setCurrentTrack] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const navigate = useNavigate();
 
@@ -33,19 +39,81 @@ const Dashboard = () => {
         setUserName(user.displayName || user.email?.split("@")[0] || "Guest");
         setUserEmail(user.email);
 
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) setStats(userDoc.data());
-      } else navigate("/login");
+        try {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            setStats({
+              playlists: data.playlists?.length ?? 0,
+              streamed: data.streamed ?? 0,
+              favorites: data.favorites ?? 0,
+              recentActivity: data.recentActivity ?? [],
+            });
+          }
+        } catch (err) {
+          console.error("Error fetching user doc:", err);
+        }
+      } else {
+        navigate("/login");
+      }
       setLoading(false);
     });
+
     return () => unsubscribe();
   }, [navigate]);
+
+  // Load last track & listen for updates from SearchAndPlay
+  useEffect(() => {
+    const last = localStorage.getItem("currentTrack");
+    if (last) {
+      try {
+        setCurrentTrack(JSON.parse(last));
+      } catch {}
+    }
+
+    const onTrackChanged = (e) => {
+      const track = e.detail;
+      if (!track) return;
+      setCurrentTrack(track);
+      setIsPlaying(true);
+
+      setStats((prev) => ({
+        ...prev,
+        streamed: (prev.streamed ?? 0) + 1,
+        recentActivity: [track.title, ...(prev.recentActivity ?? [])].slice(0, 10),
+      }));
+    };
+
+    const onStatsUpdated = (e) => {
+      const newStats = e.detail;
+      if (!newStats) return;
+      setStats((prev) => ({ ...prev, ...newStats }));
+    };
+
+    const onPlaybackState = (e) => {
+      const { isPlaying: playing } = e.detail || {};
+      if (typeof playing === "boolean") setIsPlaying(playing);
+    };
+
+    window.addEventListener("trackChanged", onTrackChanged);
+    window.addEventListener("statsUpdated", onStatsUpdated);
+    window.addEventListener("playbackState", onPlaybackState);
+
+    return () => {
+      window.removeEventListener("trackChanged", onTrackChanged);
+      window.removeEventListener("statsUpdated", onStatsUpdated);
+      window.removeEventListener("playbackState", onPlaybackState);
+    };
+  }, []);
 
   const handleLogout = async () => {
     await auth.signOut();
     navigate("/login");
   };
 
+  const sendCommand = (cmd) => {
+    window.dispatchEvent(new CustomEvent("playbackCommand", { detail: { cmd } }));
+  };
 
   if (loading) {
     return (
@@ -72,9 +140,9 @@ const Dashboard = () => {
           </div>
 
           <nav className="space-y-4 mb-8">
-            <a href="#" className="flex items-center gap-3 hover:text-sky-400"><FaHome /> Home</a>
-          <Link to='/search'>  <a href="#" className="flex items-center gap-3 hover:text-sky-400"><FaMusic /> Library</a></Link>
-          <Link to='/playlist'> <a href="#" className="flex items-center gap-3 hover:text-sky-400"><FaListUl /> Playlists</a></Link> 
+            <Link to="/" className="flex items-center gap-3 hover:text-sky-400"><FaHome /> Home</Link>
+            <Link to="/search" className="flex items-center gap-3 hover:text-sky-400"><FaMusic /> Library</Link>
+            <Link to="/playlists" className="flex items-center gap-3 hover:text-sky-400"><FaListUl /> Playlists</Link>
             <a href="#" className="flex items-center gap-3 hover:text-sky-400"><FaCog /> Settings</a>
           </nav>
         </div>
@@ -93,7 +161,7 @@ const Dashboard = () => {
           <button className="text-gray-400 hover:text-white" onClick={() => setSidebarOpen(true)}>
             <FaBars size={22} />
           </button>
-          <button className="bg-sky-400 text-black px-4 py-2 rounded-lg hover:bg-sky-500">Upgrade Plan</button>
+          <Link to="/search" className="bg-sky-400 text-black px-4 py-2 rounded-lg hover:bg-sky-500">Search</Link>
         </div>
 
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
@@ -101,71 +169,58 @@ const Dashboard = () => {
             <h2 className="text-2xl md:text-3xl font-bold">Welcome back, {userName} 👋</h2>
             <p className="text-gray-400 text-sm md:text-base">Email: {userEmail}</p>
           </div>
-          <button className="hidden md:block bg-sky-400 text-black px-4 py-2 rounded-lg hover:bg-sky-500 mt-4 md:mt-0">Upgrade Plan</button>
+          <Link to="/playlists" className="hidden md:block bg-sky-400 text-black px-4 py-2 rounded-lg hover:bg-sky-500 mt-4 md:mt-0">Your Playlists</Link>
         </div>
-
-        {/* Deezer Search */}
-        <div className="bg-gray-800 p-4 rounded-lg shadow mb-6">
-          <h3 className="text-xl font-semibold text-sky-300 mb-2">Search Songs </h3>
-          <div className="flex gap-2 mb-2">
-            <Link to='/search'>
-            <input
-              type="text"
-              placeholder="e.g. Essence, Burna Boy"
-              className="px-3 py-1 rounded bg-gray-700 text-white w-full"
-            />
-            </Link>
-            <button className="bg-sky-400 text-black px-3 rounded hover:bg-sky-500">Search</button>
-          </div>
-            </div>
 
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-gray-800 p-6 rounded-lg shadow">
             <h3 className="text-lg font-semibold text-sky-300">Playlists</h3>
-            <p className="text-3xl font-bold mt-2">{stats.playlists}</p>
+            <p className="text-3xl font-bold mt-2">{stats.playlists ?? 0}</p>
           </div>
           <div className="bg-gray-800 p-6 rounded-lg shadow">
             <h3 className="text-lg font-semibold text-sky-300">Songs Streamed</h3>
-            <p className="text-3xl font-bold mt-2">{stats.streamed}</p>
+            <p className="text-3xl font-bold mt-2">{stats.streamed ?? 0}</p>
           </div>
           <div className="bg-gray-800 p-6 rounded-lg shadow">
             <h3 className="text-lg font-semibold text-sky-300">Favorites</h3>
-            <p className="text-3xl font-bold mt-2">{stats.favorites}</p>
+            <p className="text-3xl font-bold mt-2">{stats.favorites ?? 0}</p>
           </div>
         </div>
 
-        {/* Recent Activity & Recommendations */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-gray-800 p-6 rounded-lg shadow">
-            <h3 className="text-xl font-semibold text-sky-300 mb-4">Recent Activity</h3>
-            <ul className="space-y-2 text-gray-300 text-sm md:text-base">
-              {stats.recentActivity.length > 0 ? (
-                stats.recentActivity.map((item, idx) => (
-                  <li key={idx}>🎵 {item}</li>
-                ))
-              ) : (
-                <li>No recent activity yet.</li>
-              )}
-            </ul>
-          </div>
-
-          <div className="bg-gray-800 p-6 rounded-lg shadow">
-            <h3 className="text-xl font-semibold text-sky-300 mb-4">Recommended For You</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {["album1","album2","album3","album4"].map((album, idx) => (
-                <div key={idx} className="bg-gray-700 rounded-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer">
-                  <img src={`https://via.placeholder.com/150?text=Album+${idx+1}`} alt={`Album ${idx+1}`} className="w-full h-28 object-cover"/>
-                  <p className="p-2 text-xs md:text-sm">Album {idx+1}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+        {/* Recent Activity */}
+        <div className="bg-gray-800 p-6 rounded-lg shadow mb-8">
+          <h3 className="text-xl font-semibold text-sky-300 mb-4">Recent Activity</h3>
+          <ul className="space-y-2 text-gray-300 text-sm md:text-base">
+            {stats.recentActivity.length > 0 ? (
+              stats.recentActivity.map((item, idx) => <li key={idx}>🎵 {item}</li>)
+            ) : (
+              <li>No recent activity yet.</li>
+            )}
+          </ul>
         </div>
       </main>
 
       {/* Now Playing Bar */}
-     
+      {currentTrack && (
+        <div className="fixed bottom-0 left-0 w-full bg-gray-900 border-t border-gray-700 p-3 md:p-4 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-0">
+          <div className="flex items-center gap-3 md:gap-4">
+            <img src={currentTrack.album?.cover || "https://via.placeholder.com/50"} alt={currentTrack.title} className="w-10 h-10 md:w-12 md:h-12 rounded object-cover" />
+            <div>
+              <p className="font-semibold text-sm md:text-base">{currentTrack.title}</p>
+              <p className="text-xs md:text-sm text-gray-400">{currentTrack.artist?.name}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 md:gap-6">
+            <button onClick={() => sendCommand("prev")}><FaStepBackward /></button>
+            <button onClick={() => sendCommand(isPlaying ? "pause" : "play")} className="text-xl md:text-2xl bg-white text-black rounded-full p-2">
+              {isPlaying ? <FaPause /> : <FaPlay />}
+            </button>
+            <button onClick={() => sendCommand("next")}><FaStepForward /></button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

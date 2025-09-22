@@ -29,7 +29,7 @@ const Contact = () => {
     <section id="contact" className="bg-gray-200 text-white py-16 px-6 md:px-20">
       <div className="max-w-3xl mx-auto text-center">
         <h2 className="text-4xl md:text-5xl font-bold mb-6 text-sky-400">Get in Touch</h2>
-        <p className="text-lg text-gray-300 mb-10">
+        <p className="text-lg text-black mb-10">
           Whether you're an artist, listener, or partner—VibeTune would love to hear from you.
         </p>
 
