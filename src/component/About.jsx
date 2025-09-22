@@ -9,13 +9,13 @@ const About = () => {
     >
       {/* Image Section */}
       <div className="w-full md:w-1/2 flex justify-center">
-        <img src={about} alt="About VibeTune" className="w-full max-w-sm md:max-w-md rounded-lg shadow-lg" />
+        <img src={about} alt="About VibeTune" className="w-full max-w-sm md:max-w-md " />
       </div>
 
       {/* Text Section */}
       <div className="w-full md:w-1/2 text-center md:text-left">
         <h2 className="text-3xl md:text-5xl font-bold mb-6 text-sky-400">About VibeTune</h2>
-        <p className="text-base md:text-xl leading-relaxed text-gray-300">
+        <p className="text-base md:text-xl leading-relaxed text-black">
           VibeTune is more than just a music platform—it's a movement. Built for creators, listeners, and dreamers,
           we help you discover the sounds that match your mood, your moment, and your vibe. Whether you're diving into
           Afrobeat rhythms, lo-fi chill, or underground gems, VibeTune connects you to the pulse of global music culture.
